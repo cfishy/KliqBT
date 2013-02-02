@@ -28,6 +28,9 @@
 //SoftwareSerial serialPort(11, 12); //RX, TX
 #define debugSerial Serial
 
+byte outBuffer[11];
+
+
 const bool DEBUG = 1;
 
 
@@ -39,15 +42,24 @@ class KbdRptParser : public KeyboardReportParser {
 void KbdRptParser::Parse(HID *hid, bool is_rpt_id, uint8_t len, uint8_t *buf) {
   
   //testing
-  debugSerial.print("Got a report, len= ");
-  debugSerial.println(len); 
-  
+//  debugSerial.print("Got a report, len= ");
+//  debugSerial.println(len); 
   if (buf[2] == 1) return;  //error
-  //testing
-  debugSerial.println("good report");
   
-  // test bt functionality
-  serialPort.write(" tested ");
+  outBuffer[0] = 0xFD;
+  outBuffer[1] = 9;
+  outBuffer[2] = 1;
+  
+  for (int i=0; i<8; i++) {
+    debugSerial.print(OemToAscii(0, buf[i]));
+    debugSerial.print(",");
+    outBuffer[i+3] = buf[i];
+  }
+  debugSerial.println("");
+  
+  
+  serialPort.write(outBuffer, 11);
+  
 }
 
 USB Usb;
